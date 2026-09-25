@@ -626,9 +626,11 @@
   // QR BERHASIL DIBACA
   // ==========================================
 
-  function onScanSuccess(decodedText) {
+ function onScanSuccess(decodedText) {
 
-  alert("QR TERDETEKSI!\n\nIsi QR:\n" + decodedText);
+  if (!scanning) {
+    return;
+  }
 
   scanning = false;
 
@@ -642,9 +644,8 @@
 
   document.getElementById("reader").style.display = "none";
 
-  alert("ID TIKET:\n" + currentTicketId);
+  getTicket(currentTicketId);
 }
-
   // ==========================================
   // CEK DATA TIKET
   // ==========================================
