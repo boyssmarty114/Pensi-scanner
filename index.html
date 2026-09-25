@@ -628,59 +628,41 @@
 
   function onScanSuccess(decodedText) {
 
+  if (!scanning) {
+    return;
+  }
 
-    /*
-      DEBUG SEMENTARA
+  scanning = false;
 
-      Kalau QR terbaca,
-      alert ini akan muncul.
-    */
-
-    alert(
-      "QR TERBACA: " +
+  currentTicketId =
+    extractTicketId(
       decodedText
     );
 
+  if (scanner) {
 
-    if (!scanning) {
-
-      return;
-
-    }
-
-
-    scanning = false;
-
-
-    currentTicketId =
-      extractTicketId(
-        decodedText
+    scanner
+      .clear()
+      .catch(
+        function(error) {
+          console.log(
+            "Scanner clear:",
+            error
+          );
+        }
       );
-
-
-    if (scanner) {
-
-
-      scanner
-        .clear()
-        .catch(
-          function() {}
-        );
-
-    }
-
-
-    document.getElementById(
-      "reader"
-    ).style.display = "none";
-
-
-    getTicket(
-      currentTicketId
-    );
 
   }
 
+  document.getElementById(
+    "reader"
+  ).style.display = "none";
+
+  getTicket(
+    currentTicketId
+  );
+
+}
 
   // ==========================================
   // CEK DATA TIKET
