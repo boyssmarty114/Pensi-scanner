@@ -665,44 +665,51 @@
   // START CAMERA
   // ==========================================
 
-  function startScanner() {
+function startScanner() {
 
-    scanner = new Html5Qrcode("reader");
+  scanner = new Html5Qrcode("reader");
 
-    scanner.start(
-      { facingMode: "environment" },
+  const config = {
+    fps: 15,
+    qrbox: {
+      width: 300,
+      height: 300
+    },
+    aspectRatio: 1.0,
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.QR_CODE
+    ]
+  };
 
-      {
-        fps: 10,
-        qrbox: {
-          width: 250,
-          height: 250
-        }
-      },
+  scanner.start(
+    { facingMode: "environment" },
 
-      onScanSuccess,
+    config,
 
-      function(errorMessage) {
-        // Abaikan error scan sementara
-      }
+    onScanSuccess,
 
-    ).catch(function(error) {
+    function(errorMessage) {
+      // Abaikan error scan sementara
+    }
 
-      document.getElementById("reader").innerHTML = `
-        <div class="ticket-card">
-          <h2 class="error">
-            ❌ Kamera tidak dapat digunakan
-          </h2>
+  ).catch(function(error) {
 
-          <p>
-            Pastikan browser memiliki izin menggunakan kamera.
-          </p>
-        </div>
-      `;
+    document.getElementById("reader").innerHTML = `
+      <div class="ticket-card">
+        <h2 class="error">
+          ❌ Kamera tidak dapat digunakan
+        </h2>
 
-    });
+        <p>
+          Pastikan browser memiliki izin menggunakan kamera.
+        </p>
+      </div>
+    `;
 
-  }
+    console.error(error);
+  });
+
+}
 
 
   // ==========================================
