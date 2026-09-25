@@ -1217,74 +1217,57 @@
 
   try {
 
-    // Kalau scanner lama masih ada,
-    // tunggu sampai benar-benar berhenti
     if (scanner) {
       try {
-        await scanner.clear();
-      } catch (e) {
-        console.log("Clear scanner:", e);
-      }
+        await scanner.stop();
+      } catch (e) {}
 
+      try {
+        await scanner.clear();
+      } catch (e) {}
+      
       scanner = null;
     }
 
-    // Pastikan area scanner bersih
     const reader = document.getElementById("reader");
 
     reader.innerHTML = "";
     reader.style.display = "block";
 
-    // Buat scanner baru
     scanner = new Html5Qrcode("reader");
 
-    const config = {
-      fps: 10,
-      qrbox: {
-        width: 280,
-        height: 280
-      },
-      aspectRatio: 1.0
-    };
-
     await scanner.start(
+      { facingMode: "environment" },
       {
-        facingMode: "environment"
+        fps: 10,
+        qrbox: 250
       },
-      config,
       onScanSuccess,
       function(errorMessage) {
-        // Abaikan error pembacaan QR sementara
+        // abaikan proses pencarian QR
       }
     );
 
-    console.log("Scanner berhasil dimulai.");
+    console.log("Scanner aktif");
 
   } catch (error) {
 
-    console.error(
-      "Camera error:",
-      error
-    );
+    console.error("Scanner error:", error);
 
-    document.getElementById(
-      "reader"
-    ).innerHTML = `
+    document.getElementById("reader").innerHTML = `
       <div class="ticket-card">
         <h2 class="error">
           ❌ Kamera Tidak Dapat Digunakan
         </h2>
-
         <p style="text-align:center;">
-          Pastikan browser memiliki izin menggunakan kamera,
-          lalu refresh halaman.
+          ${escapeHtml(error.message || error)}
         </p>
       </div>
     `;
+
   }
 
 }
-
 
   // ==========================================
   // ESCAPE HTML
