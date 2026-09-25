@@ -628,40 +628,21 @@
 
   function onScanSuccess(decodedText) {
 
-  if (!scanning) {
-    return;
-  }
+  alert("QR TERDETEKSI!\n\nIsi QR:\n" + decodedText);
 
   scanning = false;
 
-  currentTicketId =
-    extractTicketId(
-      decodedText
-    );
+  currentTicketId = extractTicketId(decodedText);
 
   if (scanner) {
-
-    scanner
-      .clear()
-      .catch(
-        function(error) {
-          console.log(
-            "Scanner clear:",
-            error
-          );
-        }
-      );
-
+    scanner.stop().catch(function(error) {
+      console.log("Scanner stop:", error);
+    });
   }
 
-  document.getElementById(
-    "reader"
-  ).style.display = "none";
+  document.getElementById("reader").style.display = "none";
 
-  getTicket(
-    currentTicketId
-  );
-
+  alert("ID TIKET:\n" + currentTicketId);
 }
 
   // ==========================================
