@@ -640,7 +640,7 @@
      QR BERHASIL DIBACA
      ========================================== */
 
-  function onScanSuccess(decodedText) {
+  async function onScanSuccess(decodedText) {
 
 
     if (!scanning) {
@@ -665,18 +665,20 @@
 
     if (scanner) {
 
-      scanner
-        .stop()
-        .catch(
-          function(error) {
+      try {
 
-            console.log(
-              "Scanner stop:",
-              error
-            );
+        await scanner.stop();
 
-          }
+      }
+
+      catch (error) {
+
+        console.log(
+          "Scanner stop:",
+          error
         );
+
+      }
 
     }
 
@@ -1267,8 +1269,58 @@
      SCAN LAGI
      ========================================== */
 
-  function scanAgain() {
+  async function scanAgain() {
 
+
+    /*
+      Matikan scanner lama terlebih dahulu.
+    */
+
+    scanning = false;
+
+
+    if (scanner) {
+
+      try {
+
+        await scanner.stop();
+
+      }
+
+      catch (error) {
+
+        console.log(
+          "Scanner stop:",
+          error
+        );
+
+      }
+
+
+      try {
+
+        await scanner.clear();
+
+      }
+
+      catch (error) {
+
+        console.log(
+          "Scanner clear:",
+          error
+        );
+
+      }
+
+
+      scanner = null;
+
+    }
+
+
+    /*
+      Reset data tiket.
+    */
 
     currentTicketId = "";
 
@@ -1278,15 +1330,26 @@
     ).innerHTML = "";
 
 
+    /*
+      Bersihkan area reader
+      sebelum scanner baru dibuat.
+    */
+
+    document.getElementById(
+      "reader"
+    ).innerHTML = "";
+
+
     document.getElementById(
       "reader"
     ).style.display = "block";
 
 
-    scanning = true;
+    /*
+      Nyalakan scanner baru.
+    */
 
-
-    startScanner();
+    await startScanner();
 
   }
 
@@ -1295,23 +1358,64 @@
      START CAMERA
      ========================================== */
 
-  function startScanner() {
+  async function startScanner() {
 
 
     /*
-      Jika scanner lama masih ada,
-      bersihkan terlebih dahulu.
+      Pastikan scanner lama benar-benar
+      sudah dibersihkan.
     */
 
     if (scanner) {
 
-      scanner
-        .clear()
-        .catch(
-          function() {}
+      try {
+
+        await scanner.stop();
+
+      }
+
+      catch (error) {
+
+        console.log(
+          "Scanner stop:",
+          error
         );
 
+      }
+
+
+      try {
+
+        await scanner.clear();
+
+      }
+
+      catch (error) {
+
+        console.log(
+          "Scanner clear:",
+          error
+        );
+
+      }
+
+
+      scanner = null;
+
     }
+
+
+    /*
+      Pastikan area reader kosong.
+    */
+
+    const reader =
+      document.getElementById(
+        "reader"
+      );
+
+
+    reader.innerHTML = "";
 
 
     /*
@@ -1355,71 +1459,74 @@
       Jalankan kamera belakang.
     */
 
-    scanner.start(
+    try {
 
-      {
-        facingMode:
-          "environment"
-      },
+      await scanner.start(
 
-      config,
+        {
+          facingMode:
+            "environment"
+        },
 
-      onScanSuccess,
+        config,
 
-      function(errorMessage) {
+        onScanSuccess,
 
-        /*
-          Error sementara saat
-          kamera sedang mencari QR
-          diabaikan.
-        */
+        function(errorMessage) {
 
-      }
+          /*
+            Error sementara saat
+            kamera sedang mencari QR
+            diabaikan.
+          */
 
-    )
+        }
 
-    .catch(
-      function(error) {
-
-
-        document.getElementById(
-          "reader"
-        ).innerHTML = `
-
-          <div class="ticket-card">
+      );
 
 
-            <h2 class="error">
+      scanning = true;
 
-              ❌ Kamera Tidak Dapat Digunakan
+    }
 
-            </h2>
-
-
-            <p
-              style="
-                text-align:center;
-              "
-            >
-
-              Pastikan browser memiliki
-              izin menggunakan kamera.
-
-            </p>
+    catch (error) {
 
 
-          </div>
+      reader.innerHTML = `
 
-        `;
+        <div class="ticket-card">
 
 
-        console.error(
-          "Camera error:",
-          error
-        );
+          <h2 class="error">
 
-      }
-    );
+            ❌ Kamera Tidak Dapat Digunakan
+
+          </h2>
+
+
+          <p
+            style="
+              text-align:center;
+            "
+          >
+
+            Pastikan browser memiliki
+            izin menggunakan kamera.
+
+          </p>
+
+
+        </div>
+
+      `;
+
+
+      console.error(
+        "Camera error:",
+        error
+      );
+
+    }
 
   }
 
