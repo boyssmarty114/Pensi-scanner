@@ -650,9 +650,7 @@
   // CEK DATA TIKET
   // ==========================================
 
-  function getTicket(ticketId, attempt) {
-
-  attempt = attempt || 0;
+  function getTicket(ticketId) {
 
   const result = document.getElementById("result");
 
@@ -668,40 +666,15 @@
   const url =
     API_URL +
     "?action=getTicket&id=" +
-    encodeURIComponent(ticketId) +
-    "&t=" +
-    Date.now();
+    encodeURIComponent(ticketId);
 
   jsonp(url, function(data) {
 
-    /*
-      Kalau request pertama gagal,
-      coba ulang maksimal 2 kali.
-    */
     if (
       !data ||
       data.success === false ||
       data.valid === false
     ) {
-
-      if (attempt < 2) {
-
-        result.innerHTML = `
-          <div class="ticket-card">
-            <h2>Menghubungkan...</h2>
-
-            <p style="text-align:center;">
-              Memeriksa tiket kembali.
-            </p>
-          </div>
-        `;
-
-        setTimeout(function() {
-          getTicket(ticketId, attempt + 1);
-        }, 1200);
-
-        return;
-      }
 
       result.innerHTML = `
         <div class="ticket-card">
@@ -729,6 +702,114 @@
       return;
     }
 
+    const nama =
+      data.nama || "-";
+
+    const jumlah =
+      data.jumlahKeluarga || "-";
+
+    const kursi =
+      data.noKursi || "-";
+
+    const status =
+      String(data.status || "").toLowerCase();
+
+    if (status === "hadir") {
+
+      result.innerHTML = `
+        <div class="ticket-card">
+
+          <h2>
+            Tiket Ditemukan
+          </h2>
+
+          <div class="ticket-info">
+            <strong>ID Tiket</strong>
+            <span>${escapeHtml(ticketId)}</span>
+          </div>
+
+          <div class="ticket-info">
+            <strong>Nama Anak</strong>
+            <span>${escapeHtml(nama)}</span>
+          </div>
+
+          <div class="ticket-info">
+            <strong>Jumlah Keluarga</strong>
+            <span>${escapeHtml(jumlah)} orang</span>
+          </div>
+
+          <div class="ticket-info">
+            <strong>Nomor Kursi</strong>
+            <span>${escapeHtml(kursi)}</span>
+          </div>
+
+          <p
+            class="warning"
+            style="
+              text-align:center;
+              font-weight:800;
+              margin-top:20px;
+            "
+          >
+            ⚠️ Tiket ini sudah digunakan.
+          </p>
+
+          <button
+            class="scan-again-btn"
+            onclick="scanAgain()">
+            Scan Tiket Lain
+          </button>
+
+        </div>
+      `;
+
+      return;
+    }
+
+    result.innerHTML = `
+      <div class="ticket-card">
+
+        <h2>
+          ✓ Tiket Ditemukan
+        </h2>
+
+        <div class="ticket-info">
+          <strong>ID Tiket</strong>
+          <span>${escapeHtml(ticketId)}</span>
+        </div>
+
+        <div class="ticket-info">
+          <strong>Nama Anak</strong>
+          <span>${escapeHtml(nama)}</span>
+        </div>
+
+        <div class="ticket-info">
+          <strong>Jumlah Keluarga</strong>
+          <span>${escapeHtml(jumlah)} orang</span>
+        </div>
+
+        <div class="ticket-info">
+          <strong>Nomor Kursi</strong>
+          <span>${escapeHtml(kursi)}</span>
+        </div>
+
+        <button
+          class="checkin-btn"
+          onclick="checkIn()">
+          CHECK-IN
+        </button>
+
+        <button
+          class="scan-again-btn"
+          onclick="scanAgain()">
+          Scan Tiket Lain
+        </button>
+
+      </div>
+    `;
+
+  });
+}
     // ====================================
     // DATA TIKET
     // ====================================
