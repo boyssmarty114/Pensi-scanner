@@ -656,10 +656,13 @@
 
   result.innerHTML = `
     <div class="ticket-card">
+
       <h2>Memeriksa tiket...</h2>
+
       <p style="text-align:center;">
         Mohon tunggu.
       </p>
+
     </div>
   `;
 
@@ -670,11 +673,7 @@
 
   jsonp(url, function(data) {
 
-    if (
-      !data ||
-      data.success === false ||
-      data.valid === false
-    ) {
+    if (!data || data.success === false || data.valid === false) {
 
       result.innerHTML = `
         <div class="ticket-card">
@@ -685,9 +684,7 @@
 
           <p>
             ID Tiket:
-            <strong>
-              ${escapeHtml(ticketId)}
-            </strong>
+            <strong>${escapeHtml(ticketId)}</strong>
           </p>
 
           <button
@@ -702,26 +699,17 @@
       return;
     }
 
-    const nama =
-      data.nama || "-";
-
-    const jumlah =
-      data.jumlahKeluarga || "-";
-
-    const kursi =
-      data.noKursi || "-";
-
-    const status =
-      String(data.status || "").toLowerCase();
+    const nama = data.nama || "-";
+    const jumlah = data.jumlahKeluarga || "-";
+    const kursi = data.noKursi || "-";
+    const status = String(data.status || "").toLowerCase();
 
     if (status === "hadir") {
 
       result.innerHTML = `
         <div class="ticket-card">
 
-          <h2>
-            Tiket Ditemukan
-          </h2>
+          <h2>Tiket Ditemukan</h2>
 
           <div class="ticket-info">
             <strong>ID Tiket</strong>
@@ -745,11 +733,7 @@
 
           <p
             class="warning"
-            style="
-              text-align:center;
-              font-weight:800;
-              margin-top:20px;
-            "
+            style="text-align:center; font-weight:800; margin-top:20px;"
           >
             ⚠️ Tiket ini sudah digunakan.
           </p>
@@ -769,9 +753,7 @@
     result.innerHTML = `
       <div class="ticket-card">
 
-        <h2>
-          ✓ Tiket Ditemukan
-        </h2>
+        <h2>✓ Tiket Ditemukan</h2>
 
         <div class="ticket-info">
           <strong>ID Tiket</strong>
