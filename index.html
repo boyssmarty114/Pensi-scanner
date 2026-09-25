@@ -650,84 +650,196 @@
   // CEK DATA TIKET
   // ==========================================
 
-  function getTicket(ticketId) {
+  function getTicket(ticketId, attempt) {
 
+  attempt = attempt || 0;
 
-    const result =
-      document.getElementById(
-        "result"
-      );
+  const result = document.getElementById("result");
 
+  result.innerHTML = `
+    <div class="ticket-card">
+      <h2>Memeriksa tiket...</h2>
+      <p style="text-align:center;">
+        Mohon tunggu.
+      </p>
+    </div>
+  `;
+
+  const url =
+    API_URL +
+    "?action=getTicket&id=" +
+    encodeURIComponent(ticketId) +
+    "&t=" +
+    Date.now();
+
+  jsonp(url, function(data) {
+
+    /*
+      Kalau request pertama gagal,
+      coba ulang maksimal 2 kali.
+    */
+    if (
+      !data ||
+      data.success === false ||
+      data.valid === false
+    ) {
+
+      if (attempt < 2) {
+
+        result.innerHTML = `
+          <div class="ticket-card">
+            <h2>Menghubungkan...</h2>
+
+            <p style="text-align:center;">
+              Memeriksa tiket kembali.
+            </p>
+          </div>
+        `;
+
+        setTimeout(function() {
+          getTicket(ticketId, attempt + 1);
+        }, 1200);
+
+        return;
+      }
+
+      result.innerHTML = `
+        <div class="ticket-card">
+
+          <h2 class="error">
+            ❌ Tiket Tidak Ditemukan
+          </h2>
+
+          <p>
+            ID Tiket:
+            <strong>
+              ${escapeHtml(ticketId)}
+            </strong>
+          </p>
+
+          <button
+            class="scan-again-btn"
+            onclick="scanAgain()">
+            Scan Tiket Lain
+          </button>
+
+        </div>
+      `;
+
+      return;
+    }
+
+    // ====================================
+    // DATA TIKET
+    // ====================================
+
+    const nama =
+      data.nama || "-";
+
+    const jumlah =
+      data.jumlahKeluarga || "-";
+
+    const kursi =
+      data.noKursi || "-";
+
+    const status =
+      String(data.status || "").toLowerCase();
+
+    // ====================================
+    // SUDAH DIGUNAKAN
+    // ====================================
+
+    if (status === "hadir") {
+
+      result.innerHTML = `
+        <div class="ticket-card">
+
+          <h2>
+            Tiket Ditemukan
+          </h2>
+
+          <div class="ticket-info">
+
+            <p>
+              <strong>Nama:</strong>
+              ${escapeHtml(nama)}
+            </p>
+
+            <p>
+              <strong>Jumlah Keluarga:</strong>
+              ${escapeHtml(jumlah)}
+            </p>
+
+            <p>
+              <strong>No. Kursi:</strong>
+              ${escapeHtml(kursi)}
+            </p>
+
+          </div>
+
+          <div class="warning-box">
+            ⚠️ Tiket ini sudah digunakan.
+          </div>
+
+          <button
+            class="scan-again-btn"
+            onclick="scanAgain()">
+            Scan Tiket Lain
+          </button>
+
+        </div>
+      `;
+
+      return;
+    }
+
+    // ====================================
+    // TIKET VALID
+    // ====================================
 
     result.innerHTML = `
-
       <div class="ticket-card">
 
         <h2>
-          Memeriksa tiket...
+          Tiket Ditemukan
         </h2>
 
-        <p style="text-align:center;">
-          Mohon tunggu.
-        </p>
+        <div class="ticket-info">
+
+          <p>
+            <strong>Nama:</strong>
+            ${escapeHtml(nama)}
+          </p>
+
+          <p>
+            <strong>Jumlah Keluarga:</strong>
+            ${escapeHtml(jumlah)}
+          </p>
+
+          <p>
+            <strong>No. Kursi:</strong>
+            ${escapeHtml(kursi)}
+          </p>
+
+        </div>
+
+        <button
+          class="checkin-btn"
+          onclick="checkIn()">
+          CHECK-IN
+        </button>
+
+        <button
+          class="scan-again-btn"
+          onclick="scanAgain()">
+          Scan Tiket Lain
+        </button>
 
       </div>
-
     `;
 
-
-    const url =
-      API_URL +
-      "?action=getTicket&id=" +
-      encodeURIComponent(
-        ticketId
-      );
-
-
-    jsonp(
-      url,
-      function(data) {
-
-
-        if (
-          !data ||
-          data.success === false ||
-          data.valid === false
-        ) {
-
-
-          result.innerHTML = `
-
-            <div class="ticket-card">
-
-              <h2 class="error">
-                ❌ Tiket Tidak Ditemukan
-              </h2>
-
-              <p>
-                ID Tiket:
-                <strong>
-                  ${escapeHtml(ticketId)}
-                </strong>
-              </p>
-
-              <button
-                class="scan-again-btn"
-                onclick="scanAgain()">
-
-                Scan Tiket Lain
-
-              </button>
-
-            </div>
-
-          `;
-
-
-          return;
-
-        }
-
+  });
+}
 
         // ====================================
         // DATA TIKET
