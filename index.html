@@ -1213,111 +1213,77 @@
   // START CAMERA
   // ==========================================
 
-  function startScanner() {
+  async function startScanner() {
 
+  try {
 
-    /*
-      Kalau scanner lama masih aktif,
-      hentikan terlebih dahulu.
-    */
-
+    // Kalau scanner lama masih ada,
+    // tunggu sampai benar-benar berhenti
     if (scanner) {
+      try {
+        await scanner.clear();
+      } catch (e) {
+        console.log("Clear scanner:", e);
+      }
 
-      scanner
-        .clear()
-        .catch(
-          function() {}
-        );
-
+      scanner = null;
     }
 
+    // Pastikan area scanner bersih
+    const reader = document.getElementById("reader");
 
-    scanner =
-      new Html5Qrcode(
-        "reader"
-      );
+    reader.innerHTML = "";
+    reader.style.display = "block";
 
+    // Buat scanner baru
+    scanner = new Html5Qrcode("reader");
 
     const config = {
-
-      fps: 15,
-
+      fps: 10,
       qrbox: {
-        width: 300,
-        height: 300
+        width: 280,
+        height: 280
       },
-
-      aspectRatio: 1.0,
-
-      formatsToSupport: [
-
-        Html5QrcodeSupportedFormats.QR_CODE
-
-      ]
-
+      aspectRatio: 1.0
     };
 
-
-    scanner.start(
-
+    await scanner.start(
       {
-        facingMode:
-          "environment"
+        facingMode: "environment"
       },
-
       config,
-
       onScanSuccess,
-
       function(errorMessage) {
-
-        // Abaikan error scan sementara
-
+        // Abaikan error pembacaan QR sementara
       }
-
-    )
-
-    .catch(
-      function(error) {
-
-
-        document.getElementById(
-          "reader"
-        ).innerHTML = `
-
-          <div class="ticket-card">
-
-            <h2 class="error">
-
-              ❌ Kamera Tidak Dapat Digunakan
-
-            </h2>
-
-
-            <p
-              style="text-align:center;"
-            >
-
-              Pastikan browser memiliki
-              izin menggunakan kamera.
-
-            </p>
-
-          </div>
-
-        `;
-
-
-        console.error(
-          "Camera error:",
-          error
-        );
-
-      }
-
     );
 
+    console.log("Scanner berhasil dimulai.");
+
+  } catch (error) {
+
+    console.error(
+      "Camera error:",
+      error
+    );
+
+    document.getElementById(
+      "reader"
+    ).innerHTML = `
+      <div class="ticket-card">
+        <h2 class="error">
+          ❌ Kamera Tidak Dapat Digunakan
+        </h2>
+
+        <p style="text-align:center;">
+          Pastikan browser memiliki izin menggunakan kamera,
+          lalu refresh halaman.
+        </p>
+      </div>
+    `;
   }
+
+}
 
 
   // ==========================================
