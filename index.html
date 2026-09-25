@@ -1217,6 +1217,7 @@
 
   try {
 
+    // Kalau scanner lama masih ada, hentikan dulu
     if (scanner) {
       try {
         await scanner.stop();
@@ -1225,48 +1226,70 @@
       try {
         await scanner.clear();
       } catch (e) {}
-      
-      scanner = null;
     }
-
-    const reader = document.getElementById("reader");
-
-    reader.innerHTML = "";
-    reader.style.display = "block";
 
     scanner = new Html5Qrcode("reader");
 
+    // Ambil daftar kamera
+    const cameras = await Html5Qrcode.getCameras();
+
+    if (!cameras || cameras.length === 0) {
+      throw new Error("Kamera tidak ditemukan");
+    }
+
+    console.log("Daftar kamera:", cameras);
+
+    // Cari kamera belakang
+    let cameraId = cameras[cameras.length - 1].id;
+
+    for (let i = 0; i < cameras.length; i++) {
+      const label = cameras[i].label.toLowerCase();
+
+      if (
+        label.includes("back") ||
+        label.includes("rear") ||
+        label.includes("environment")
+      ) {
+        cameraId = cameras[i].id;
+        break;
+      }
+    }
+
+    const config = {
+      fps: 10,
+      qrbox: {
+        width: 250,
+        height: 250
+      }
+    };
+
     await scanner.start(
-      { facingMode: "environment" },
-      {
-        fps: 10,
-        qrbox: 250
-      },
+      cameraId,
+      config,
       onScanSuccess,
       function(errorMessage) {
-        // abaikan proses pencarian QR
+        // Abaikan pesan ketika QR belum terbaca
       }
     );
 
-    console.log("Scanner aktif");
+    console.log("Scanner berhasil dimulai");
 
   } catch (error) {
 
-    console.error("Scanner error:", error);
+    console.error("Camera error:", error);
 
     document.getElementById("reader").innerHTML = `
       <div class="ticket-card">
         <h2 class="error">
           ❌ Kamera Tidak Dapat Digunakan
         </h2>
+
         <p style="text-align:center;">
-          ${escapeHtml(error.message || error)}
+          ${error.message || error}
         </p>
       </div>
     `;
-
   }
-
 }
 
   // ==========================================
